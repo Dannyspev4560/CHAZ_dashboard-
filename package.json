@@ -1,0 +1,25 @@
+{
+  "name": "fullstack_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"cd backend && node server.js\" \"cd client && npm start\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^4.1.0",
+    "cors": "^2.8.5",
+    "react-canvas-js": "^1.0.1",
+    "react-d3": "^0.4.0",
+    "react-d3-graph": "^2.0.1",
+    "react-minimal-pie-chart": "^4.0.0",
+    "semantic-ui-css": "^2.4.1"
+  },
+  "devDependencies": {
+    "d3": "^5.9.2",
+    "react-dom": "^16.8.6"
+  }
+}

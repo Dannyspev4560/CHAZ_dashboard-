@@ -4,19 +4,27 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"cd backend && node server.js\" \"cd client && npm start\""
+    "start": "cd client && npm start\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@trendmicro/react-sidenav": "^0.4.5",
+    "bootstrap": "^4.3.1",
     "concurrently": "^4.1.0",
     "cors": "^2.8.5",
+    "install": "^0.12.2",
+    "react": "^16.8.6",
     "react-canvas-js": "^1.0.1",
     "react-d3": "^0.4.0",
     "react-d3-graph": "^2.0.1",
+    "react-google-charts": "^3.0.13",
     "react-minimal-pie-chart": "^4.0.0",
-    "semantic-ui-css": "^2.4.1"
+    "reactstrap": "^8.0.0",
+    "recharts": "^1.6.2",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.87.1"
   },
   "devDependencies": {
     "d3": "^5.9.2",

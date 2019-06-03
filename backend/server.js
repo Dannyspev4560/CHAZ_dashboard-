@@ -3,29 +3,77 @@ const bodyParser = require("body-parser");
 const cors = require('cors');
 const logger = require("morgan");
 const sql=require('mssql');
-const sql2=require('mssql');
 const API_PORT = 3002;
 const app = express();
 const router = express.Router();
 app.use(cors());
 
-const firstCycle="14916";
-const lastCycle="14924";
+const firstCycle="15881";
+const lastCycle="15885";
+let cyclesStr="16586,16587,16588,16589,16590,16591";
+//TODO: timer that gets queries from the db
 
-const SELECT_RUNNING_CYCLES_temp="select c.ID,c.Description,sum(case when Ex.Status=1 then 1 else 0 end) as Ex_Running, " +
+getSqlData();
+generalSqlData();
+setInterval(()=>{
+    console.log('-----------request started-----------------');
+    getSqlData();
+}, 300000);//5 minutes
+setInterval(()=>{
+    console.log('-----------request started-----------------');
+    generalSqlData();
+}, 43200000);//12 hours
+
+
+function runningCyclesQuery(){
+    return "select c.ID,c.Description,sum(case when Ex.Status=1 then 1 else 0 end) as Ex_Running, " +
+        "sum(case when Ex.Status in (2,5) and Ex.ReRunCount=0 then 1 else 0 end) as Ex_Completed, " +
+        "sum(case when Ex.Status=0 then 1 else 0 end) as Ex_Pending, " +
+        "sum(case when Ex.Status in (2) and Ex.Result in (2,3,6) and Ex.ReRunCount=0 then 1 else 0 end) as Ex_Failed, "+
+        "sum(case when Ex.Result=1 and Ex.Status=2 then 1 else 0 end) as Ex_Passed, "+
+        "sum(case when Ex.Status=3 then 1 else 0 end ) as Ex_Terminated, "+
+        "sum(case when Ex.Status=5 then 1 else 0 end ) as Ex_TimeOut "+
+        "from Executions Ex " +
+        "join CycleDefinition cd on Ex.CycleDefinitionID=cd.ID " +
+        "Join Cycles c  on cd.CycleID=c.ID "+
+        `where c.ID in (${cyclesStr})`+
+        "group by c.ID, c.Description " +
+        "order by c.ID desc";
+}
+let SELECT_RUNNING_CYCLES_temp="select c.ID,c.Description,sum(case when Ex.Status=1 then 1 else 0 end) as Ex_Running, " +
     "sum(case when Ex.Status in (2,5) then 1 else 0 end) as Ex_Completed, " +
     "sum(case when Ex.Status=0 then 1 else 0 end) as Ex_Pending, " +
-    "sum(case when Ex.Result=6 and Ex.ReRunCount=1 then 1 else 0 end) as Ex_Failed, "+
+    "sum(case when Ex.Status in (2) and Ex.Result in (2,3,6) and Ex.ReRunCount=0 then 1 else 0 end) as Ex_Failed, "+
     "sum(case when Ex.Result=1 and Ex.Status=2 then 1 else 0 end) as Ex_Passed, "+
     "sum(case when Ex.Status=3 then 1 else 0 end ) as Ex_Terminated, "+
     "sum(case when Ex.Status=5 then 1 else 0 end ) as Ex_TimeOut "+
     "from Executions Ex " +
     "join CycleDefinition cd on Ex.CycleDefinitionID=cd.ID " +
     "Join Cycles c  on cd.CycleID=c.ID "+
-    `where c.ID between ${firstCycle} and ${lastCycle} `+
+    `where c.ID in (${cyclesStr})`+
     "group by c.ID, c.Description " +
     "order by c.ID desc";
-const SELECT_EXEC_BY_CYCLE_ID = "select c.ID, ex.PlatformProperties, Ex.DUTSerial, ex.stationName,substring(ex.resultInfo,1,200),er.Name, datediff( MINUTE,Ex.StartDateTime, ex.EndDateTime) " +
+
+const GET_ALL_OVENS="Select c.name oven,cs.name state,cm.name mode,CurrentTemperature,GoalTemperature,ProgramName,ChamberStatusAdditionalInfo from chamber.Chamber c " +
+    "join chamber.ChamberMode cm on c.ChamberModeID=cm.ID " +
+    "join chamber.ChamberState cs on c.ChamberStateID=cs.ID " +
+    "order by c.id desc" ;
+
+const GET_SETUP_STATUS_BY_RACK="select r.Name, " +
+    "sum(case when e.Name = 'Available' then 1 else 0 end ) as Available, " +
+    "sum(case when e.Name = 'NotAvailable' then 1 else 0 end ) as NotAvailable, " +
+    "sum(case when e.Name = 'Found' then 1 else 0 end ) as Found, " +
+    "sum(case when e.Name = 'ReadyForSelfTest' then 1 else 0 end ) as ReadyForSelfTest, " +
+    "sum(case when e.Name = 'NotFound' then 1 else 0 end ) as NotFound " +
+    "from Rack r " +
+    "join Stations s on s.RackID=r.ID " +
+    "join SetupMappings sm on sm.StationID=s.ID " +
+    "join EnumSetupMappingStatuses e on e.Id=sm.Status " +
+    "where r.name in('Rack-oven11R','Rack-oven11L','Rack-ovn9L','Rack-ovn9R','Rack-Oven1L','Rack-Oven1R', " +
+    "'Rack-Oven7L','Rack-Oven7R','Rack-Oven4L','Rack-Oven4R','Rack-Oven5L','Rack-Oven5R','Rack-ovn8L','Rack-ovn8R') " +
+    "group by r.Name";
+
+let SELECT_EXEC_BY_CYCLE_ID = "select c.ID, ex.PlatformProperties, Ex.DUTSerial, ex.stationName,substring(ex.resultInfo,1,200),er.Name, datediff( MINUTE,Ex.StartDateTime, ex.EndDateTime) " +
     "from Executions Ex " +
     "Join CycleDefinition cd on Ex.CycleDefinitionID=cd.ID " +
     "join TestPlans tp on  tp.id = cd.TestID " +
@@ -35,130 +83,193 @@ const SELECT_EXEC_BY_CYCLE_ID = "select c.ID, ex.PlatformProperties, Ex.DUTSeria
     "join EnumResults er on er.Id = ex.Result " +
     "where c.ID in(13089) and er.Name != 'NONE' " +
     "order by ex.stationName asc";
-const SELECT_OVEN_STATUS_BY_STATIONNAME="SELECT  count(sm.status) as 'Count',e.Name from SetupMappings sm" +
-    "  join Stations s on sm.StationID=s.ID" +
-    "  join EnumSetupMappingStatuses e on e.Id=sm.Status" +
-    "  where s.Name LIKE '%tfn-ovn11%'" +
-    "  group by e.Name";
-const SELECT_CHAMBER_BY_NAME="select c.Name,cs.Name 'State',cm.Name 'Mode',c.CurrentTemperature,c.GoalTemperature,c.ProgramName,c.Host,c.ChamberStatusAdditionalInfo from chamber.Chamber c " +
-    "join  chamber.ChamberState cs on cs.ID=c.ChamberStateID " +
-    "join chamber.ChamberMode cm on cm.ID=c.ChamberModeID " +
-    "where c.Name='ovn11'";
-const SELECT_TOTAL_EXEC_BY_CYCLE="select ex.ID,CycleDefinitionID,eem.Name 'Status',er.Name 'Result',ex.PlatformProperties from Executions ex " +
-    "join CycleDefinition cd on Ex.CycleDefinitionID=cd.ID " +
-    "Join Cycles c  on cd.CycleID=c.ID " +
-    "join EnumExecutionStatuses eem on eem.Id=ex.Status " +
-    "join EnumResults er on er.Id=ex.Result " +
-    `where c.ID between ${firstCycle} and ${lastCycle} and eem.Name!='Replaced' and ex.ReRunRequest!='1'`
+function ovenStatusQuery() {
+    return "SELECT  count(sm.status) as 'Count',e.Name from SetupMappings sm" +
+        "  join Stations s on sm.StationID=s.ID" +
+        "  join EnumSetupMappingStatuses e on e.Id=sm.Status" +
+        "  where s.Name LIKE '%tfn-ovn11%'" +
+        "  group by e.Name";
+}
+function chamberByNameQuery(){
+    return "select c.Name,cs.Name 'State',cm.Name 'Mode',c.CurrentTemperature,c.GoalTemperature,c.ProgramName,c.Host,c.ChamberStatusAdditionalInfo from chamber.Chamber c " +
+        "join  chamber.ChamberState cs on cs.ID=c.ChamberStateID " +
+        "join chamber.ChamberMode cm on cm.ID=c.ChamberModeID " +
+        "where c.Name='ovn11'";
+}
+
+function executionsByCycleQuery(){
+    return "select ex.ID,CycleDefinitionID,eem.Name 'Status',er.Name 'Result',ex.PlatformProperties from Executions ex " +
+        "join CycleDefinition cd on Ex.CycleDefinitionID=cd.ID " +
+        "Join Cycles c  on cd.CycleID=c.ID " +
+        "join EnumExecutionStatuses eem on eem.Id=ex.Status " +
+        "join EnumResults er on er.Id=ex.Result " +
+        `where c.ID in (${cyclesStr}) and eem.Name!='Replaced' and ex.ReRunRequest!='1'`;
+}
+function totalTestsByCycleQuery(){
+    return "select cd.ID,cd.Quantity,cd.TestID,tp.Description from CycleDefinition cd " +
+        "join TestPlans tp on tp.ID=cd.TestID " +
+        "Join Cycles c  on cd.CycleID=c.ID " +
+        `where c.ID in (${cyclesStr}) `
+}
 
 
 
 const config={
     server:'10.24.8.188',
     user:'daniel',
-    password:'D95a8nnyS123',
+    password:'Danny958spevak',
     database:'Swift_Prod_33',
 };
 const configAutomationMain={
     server:'10.24.8.188',
     user:'daniel',
-    password:'D95a8nnyS123',
+    password:'Danny958spevak',
     database:'AutomationMain',
 };
+const configDWH={
+    server:'10.24.8.171',
+    user:'daniel',
+    password:'Danny958spevak',
+    database:'iNAND_BI',
+};
 
-const pool = sql.connect(config);
+// const pool = sql.connect(config);
 //const pool2 = sql2.connect(configAutomationMain);
-
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
 
-router.get("/getData", (req, res) => {
-    return res.json({ success: true});
-});
-
-// router.get("/cycles", (req, res) => {
-//   new sql.Request().query(SELECT_RUNNING_CYCLES_temp, (err, result) => {
-//     return res.json({result});
-//
-//   })
-// });
-
-router.get("/cycles", (req, res) => {
-    new sql.ConnectionPool(config).connect().then(pool => {
-        return pool.request().query(SELECT_RUNNING_CYCLES_temp)
-    }).then(result => {
-        let rows = result.recordset;
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.status(200).json(rows);
-        sql.close();
-    }).catch(err => {
-        router.get("/cycles", (req, res) => {
-            res.status(500).send({message: `${err}`});
+function generalSqlData(){
+    router.get("/allOvens", (req, res) => {
+        new sql.ConnectionPool(configAutomationMain).connect().then(pool => {
+            return pool.request().query(GET_ALL_OVENS)
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            router.get("/allOvens", (req, res) => {
+                res.status(500).send({message: `${err}`});
+            });
+            sql.close();
         });
-
-        sql.close();
     });
-});
 
-
-router.get("/ovenUtil", (req, res) => {
-    new sql.ConnectionPool(config).connect().then(pool => {
-        return pool.request().query(SELECT_OVEN_STATUS_BY_STATIONNAME)
-    }).then(result => {
-        let rows = result.recordset;
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.status(200).json(rows);
-        sql.close();
-    }).catch(err => {
-        router.get("/cycles", (req, res) => {
-            res.status(500).send({message: `${err}`});
+    router.get("/setupStatuses", (req, res) => {
+        new sql.ConnectionPool(config).connect().then(pool => {
+            return pool.request().query(GET_SETUP_STATUS_BY_RACK)
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            router.get("/setupStatuses", (req, res) => {
+                res.status(500).send({message: `${err}`});
+            });
+            sql.close();
         });
-
-        sql.close();
     });
-});
 
-router.get("/executions", (req, res) => {
-    new sql.ConnectionPool(config).connect().then(pool => {
-        return pool.request().query(SELECT_TOTAL_EXEC_BY_CYCLE)
-    }).then(result => {
-        let rows = result.recordset;
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.status(200).json(rows);
-        sql.close();
-    }).catch(err => {
-        res.status(500).send({ message: `${err}`});
-        sql.close();
+}
+function getSqlData ()
+{
+    router.get("/getData", (req, res) => {
+        return res.json({success: true});
     });
-});
 
-
-
-
-
-router.get("/chamber", (req, res) => {
-    new sql.ConnectionPool(configAutomationMain).connect().then(pool => {
-        return pool.request().query(SELECT_CHAMBER_BY_NAME)
-    }).then(result => {
-        let rows = result.recordset
-        res.setHeader('Access-Control-Allow-Origin', '*')
-        res.status(200).json(rows);
-        sql.close();
-    }).catch(err => {
-        res.status(500).send({ message: `${err}`});
-        sql.close();
+    router.get("/cycles", (req, res) => {
+        new sql.ConnectionPool(config).connect().then(pool => {
+            return pool.request().query(runningCyclesQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            router.get("/cycles", (req, res) => {
+                res.status(500).send({message: `${err}`});
+            });
+            sql.close();
+        });
     });
-});
+
+
+    router.get("/ovenUtil", (req, res) => {
+        new sql.ConnectionPool(config).connect().then(pool => {
+            return pool.request().query(ovenStatusQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            router.get("/ovenUtil", (req, res) => {
+                res.status(500).send({message: `${err}`});
+            });
+            sql.close();
+        });
+    });
+
+
+    router.get("/executions", (req, res) => {
+        new sql.ConnectionPool(config).connect().then(pool => {
+            return pool.request().query(executionsByCycleQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            res.status(500).send({message: `${err}`});
+            sql.close();
+        });
+    });
+
+
+    router.get("/chamber", (req, res) => {
+        new sql.ConnectionPool(configAutomationMain).connect().then(pool => {
+            return pool.request().query(chamberByNameQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            res.status(500).send({message: `${err}`});
+            sql.close();
+        });
+    });
+
+    router.get("/totalTests", (req, res) => {
+        new sql.ConnectionPool(config).connect().then(pool => {
+            return pool.request().query(totalTestsByCycleQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            res.status(500).send({message: `${err}`});
+            sql.close();
+        });
+    });
+
+}
 
 
 router.post("/updateData", (req, res) => {
-  const { id, update } = req.body;
-  console.log("-------got it-----");
+  const { id, body } = req.body;
+  console.log("-------got data from client-----");
   console.log(id);
-  console.log(update);
+  console.log(body);
+  console.log(body.message.Oven);
+  cyclesStr=body.message.cycle;
+  getSqlData();
   return res.json({ success: true });
 });
 

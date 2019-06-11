@@ -1,0 +1,16 @@
+.table{
+    text-wrap: inherit;
+    font-size: 12px;
+    position: center;
+    text-wrap: normal;
+    line-height: 1em;
+
+}
+
+.tableContent{
+    font-weight: normal;
+}
+
+.wrapLongWord{
+    word-break: break-all;
+}

@@ -1,0 +1,15 @@
+.filterBar{
+    box-shadow:2px 2px 2px #aaaaaa;
+    border:1px solid lightgrey;
+    border-radius: 0.7em;
+    padding: 0.5em;
+    background-color: #f9fafb;
+}
+
+.errorMsg{
+    visibility: visible;
+    color: #b02d2c;
+}
+.errorMsgHidden{
+    visibility: hidden;
+}

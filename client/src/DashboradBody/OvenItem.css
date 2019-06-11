@@ -1,0 +1,107 @@
+
+.oven-wrapper {
+    margin:1em;
+    grid-column-end:3;
+    grid-column-start:2;
+    display: grid;
+    grid-gap: 0.5em;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr 2fr;
+    background-color: #fff;
+    color: #444;
+    font-family: Raleway, sans-serif;
+    width: 250px;
+}
+.oven-section1{
+    padding: 0.5em 1em;
+    text-align:center;
+    background-color: #f9fafb;
+    display:grid;
+    grid-template-columns: 1fr 4fr ;
+    grid-template-rows: 1fr 1fr ;
+    grid-row-end:2;
+    grid-row-start:1;
+    border-radius: 0.5em;
+    border: 0.2em solid #b9b7bd;
+    box-shadow: 2px 2px 2px #aaaaaa;
+
+}
+
+.oven-section2{
+    text-align:center;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr ;
+    grid-row-start:2;
+    grid-row-end:3;
+
+    grid-gap:0.15em;
+}
+.profile-sec2{
+    grid-row-start:2;
+    grid-row-end:3;
+    grid-column-start:1;
+    grid-column-end:3;
+}
+.oven-section3{
+    text-align:center;
+    display:grid;
+    grid-template-columns: 3fr 2fr 1fr  ;
+    grid-template-rows: 1fr 1fr ;
+    grid-row-start:3;
+    grid-row-end:4;
+    grid-gap:0.15em;
+}
+.inner-border{
+    border: 1px solid lightgrey;
+    border-radius: 0.3em;
+    padding: 0.1em 0.2em;
+    box-shadow: 2px 2px 2px #aaaaaa;
+}
+.sec3-2rows{
+    grid-row-start:1;
+    grid-row-end:3;
+    grid-column-start:3;
+    grid-column-end:4;
+    padding-top:1em;
+}
+
+.oven-section4{
+    padding: 2em 1em;
+    border-radius: 0.5em;
+    text-align:center;
+    background-color: #FAFAFA;
+    display:grid;
+    grid-template-columns: 1fr ;
+    grid-row-start:4;
+    grid-row-end:5;
+    border: 1px solid lightgrey;
+    box-shadow: 5px 5px 2px #aaaaaa;
+    visibility: hidden;
+}
+.dotOven {
+    height: 15px;
+    width: 15px;
+    margin-top: 1em ;
+    margin-left:0.5em;
+    border-radius: 50%;
+    box-shadow: 1px 1px 1px #aaaaaa;
+    grid-row-start:1;
+    grid-row-end:3;
+
+}
+.ovnTitle{
+    font-size: 2em;
+    font-family: 'Varela Round', sans-serif;
+    padding: 0.2em;
+}
+
+.red {
+    background-color: #b04342;
+}
+.green{
+    background-color: #43c148;
+}
+.yellow{
+    background-color: #e3e34f;
+}

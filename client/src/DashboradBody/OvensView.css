@@ -1,0 +1,6 @@
+.ovensDisplay{
+    display: flex;
+}
+.ovensDisplay > div {
+    flex: 1; /*grow*/
+}

@@ -8,9 +8,10 @@ const app = express();
 const router = express.Router();
 app.use(cors());
 
-const firstCycle="15881";
-const lastCycle="15885";
+
 let cyclesStr="16586,16587,16588,16589,16590,16591";
+let source_Site_ID="33";
+let database="Swift_Prod_33";
 //TODO: timer that gets queries from the db
 
 getSqlData();
@@ -111,14 +112,33 @@ function totalTestsByCycleQuery(){
         "Join Cycles c  on cd.CycleID=c.ID " +
         `where c.ID in (${cyclesStr}) `
 }
+function jirasByCyclesQuery(){
+    return "select top 100 j.Issue_Key,  r.Execution_Id, c.Cycle_Id , r.Source_Site_Id from dwh.Dim_JIRA_Issues j  " +
+        "inner join dwh.raw_executions r on j.JIRA_Issue_Id = r.jira_issue_id " +
+        "inner join dwh.Dim_Cycles c on c.Cycle_Key = r.Cycle_Key " +
+        `where c.Cycle_Id in (${cyclesStr})  and r.Source_Site_Id = ${source_Site_ID}`
+}
 
 
-
-const config={
+function config188(){
+    return {
+        server:'10.24.8.188',
+        user:'daniel',
+        password:'Danny958spevak',
+        database:database,
+    }
+}
+const configDeneb33={
     server:'10.24.8.188',
     user:'daniel',
     password:'Danny958spevak',
     database:'Swift_Prod_33',
+};
+const configEnif35={
+    server:'10.24.8.188',
+    user:'daniel',
+    password:'Danny958spevak',
+    database:'Enif_Production_35',
 };
 const configAutomationMain={
     server:'10.24.8.188',
@@ -133,10 +153,6 @@ const configDWH={
     database:'iNAND_BI',
 };
 
-// const pool = sql.connect(config);
-//const pool2 = sql2.connect(configAutomationMain);
-// (optional) only made for logging and
-// bodyParser, parses the request body to be a readable json format
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -159,8 +175,23 @@ function generalSqlData(){
         });
     });
 
-    router.get("/setupStatuses", (req, res) => {
-        new sql.ConnectionPool(config).connect().then(pool => {
+    router.get("/setupStatusesDeneb", (req, res) => {
+        new sql.ConnectionPool(configDeneb33).connect().then(pool => {
+            return pool.request().query(GET_SETUP_STATUS_BY_RACK)
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            router.get("/setupStatuses", (req, res) => {
+                res.status(500).send({message: `${err}`});
+            });
+            sql.close();
+        });
+    });
+    router.get("/setupStatusesEnif", (req, res) => {
+        new sql.ConnectionPool(configEnif35).connect().then(pool => {
             return pool.request().query(GET_SETUP_STATUS_BY_RACK)
         }).then(result => {
             let rows = result.recordset;
@@ -183,7 +214,7 @@ function getSqlData ()
     });
 
     router.get("/cycles", (req, res) => {
-        new sql.ConnectionPool(config).connect().then(pool => {
+        new sql.ConnectionPool(config188()).connect().then(pool => {
             return pool.request().query(runningCyclesQuery())
         }).then(result => {
             let rows = result.recordset;
@@ -200,7 +231,7 @@ function getSqlData ()
 
 
     router.get("/ovenUtil", (req, res) => {
-        new sql.ConnectionPool(config).connect().then(pool => {
+        new sql.ConnectionPool(configEnif35).connect().then(pool => {
             return pool.request().query(ovenStatusQuery())
         }).then(result => {
             let rows = result.recordset;
@@ -217,7 +248,7 @@ function getSqlData ()
 
 
     router.get("/executions", (req, res) => {
-        new sql.ConnectionPool(config).connect().then(pool => {
+        new sql.ConnectionPool(config188()).connect().then(pool => {
             return pool.request().query(executionsByCycleQuery())
         }).then(result => {
             let rows = result.recordset;
@@ -246,8 +277,21 @@ function getSqlData ()
     });
 
     router.get("/totalTests", (req, res) => {
-        new sql.ConnectionPool(config).connect().then(pool => {
+        new sql.ConnectionPool(config188()).connect().then(pool => {
             return pool.request().query(totalTestsByCycleQuery())
+        }).then(result => {
+            let rows = result.recordset;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.status(200).json(rows);
+            sql.close();
+        }).catch(err => {
+            res.status(500).send({message: `${err}`});
+            sql.close();
+        });
+    });
+    router.get("/jiras", (req, res) => {
+        new sql.ConnectionPool(configDWH).connect().then(pool => {
+            return pool.request().query(jirasByCyclesQuery())
         }).then(result => {
             let rows = result.recordset;
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -269,6 +313,7 @@ router.post("/updateData", (req, res) => {
   console.log(body);
   console.log(body.message.Oven);
   cyclesStr=body.message.cycle;
+  database=body.message.DB;
   getSqlData();
   return res.json({ success: true });
 });

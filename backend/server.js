@@ -149,7 +149,7 @@ const configAutomationMain={
 const configDWH={
     server:'10.24.8.171',
     user:'daniel',
-    password:'Danny958spevak',
+    password:'D95a8nnyS',
     database:'iNAND_BI',
 };
 

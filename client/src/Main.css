@@ -2,3 +2,12 @@
     font-size: 2em;
     font-weight: bold;
 }
+
+.visibilityHidden{
+    visibility: hidden;
+    display: none;
+}
+
+.visibilityVisible{
+    visibility: visible;
+}

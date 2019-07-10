@@ -11,7 +11,7 @@ class FilterBar extends React.Component{
     activeIndex:-1,
     chosenData:{
         DB:0,
-        Oven:0,
+        Oven:this.props.oven,
         cycle:0,
         }
 };
@@ -27,7 +27,7 @@ class FilterBar extends React.Component{
     render(){
         let optionsO=[];
         let cnt=0;
-        if(this.props.data.length>0) {
+        if(this.props.data!=null && this.props.data.length>0) {
             for (var i in this.props.data) {
                 optionsO[cnt] = {
                     key: this.props.data[i].oven,

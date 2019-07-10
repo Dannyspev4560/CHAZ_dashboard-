@@ -18,7 +18,7 @@ class OvenItem extends React.Component{
     if (this.props.data!=null) {
     if (this.props.data.get("Name") != null) {
         const data = this.props.data;
-        console.log(data.get("Name"));
+        console.log(data.get("Name"),data.get("Name_"));
         ovenview = <div className="oven-wrapper" key={data.get("Name")}>
             <div className="oven-section1" alt={this.props.data.get("ChamberStatusAdditionalInfo")}>
                 <div className={this.props.data.get("state") == "Active" ? DotGreen : DotYellow}></div>

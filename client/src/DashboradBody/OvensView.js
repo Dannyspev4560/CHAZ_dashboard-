@@ -14,9 +14,9 @@ class OvensView extends React.Component{
         if (ovenNamerArr.length>0){
             for(var ovenNameIndex in ovenNamerArr) {
                 for (var rackIndex in  dataArr) {
-                    if (dataArr[rackIndex].get("oven") == ovenNamerArr[ovenNameIndex])
-                        var check = ovenNamerArr[0];
-                    console.log(check);
+                    //if (dataArr[rackIndex].get("oven") == ovenNamerArr[ovenNameIndex])
+                      //  var check = ovenNamerArr[0];
+
                     var tempArr = dataArr.filter(rackObj => rackObj.get("oven") == ovenNamerArr[ovenNameIndex]);
                     if (tempArr.length == 2 && ovenItems.filter(rackObj=>rackObj.get("oven")==ovenNamerArr[ovenNameIndex]).length==0) {
                         var ovnMappedObj = new Map();
@@ -26,11 +26,12 @@ class OvensView extends React.Component{
                         ovnMappedObj.set("Available", tempArr[0].get("Available") + tempArr[1].get("Available"));
                         ovnMappedObj.set("NotAvailable", tempArr[0].get("NotAvailable") + tempArr[1].get("NotAvailable"));
                         ovnMappedObj.set("Found", tempArr[0].get("Found") + tempArr[1].get("Found"));
-                        ovnMappedObj.set("Name_", tempArr[1]);
+                        ovnMappedObj.set("Name_", tempArr[1].get("Name"));
                         ovenItems.push(ovnMappedObj);
                     }
                 }
             }
+            console.log(ovenItems);
             let view =ovenItems.map(obj=>{return(
                 <OvenItem  data={obj}/>
             )});

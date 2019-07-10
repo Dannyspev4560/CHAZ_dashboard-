@@ -26,9 +26,9 @@ class DashboardBody extends React.Component{
             setups_status:[],
             activeIndex: null,
             DB:[],
-            Oven:0,
+            Oven:[],
             cycle:[],
-            ovens:[],
+            ovens:this.props.ovensState,
             IsDataToServerOK:true,
             ovenUtilsDeneb:[],
             ovenUtilsEnif:[],
@@ -56,7 +56,6 @@ class DashboardBody extends React.Component{
 
 
     getDataFromDb = ()=> {
-        //TODO: my data is an array, so i need to iterate over the array using Array.prototype.map()- to work the right way.
 
         axios.get('http://localhost:3002/api/cycles', {})
             .then((res) => {
@@ -74,68 +73,37 @@ class DashboardBody extends React.Component{
             .catch(function (error) {
                 console.log(error);
             });
-        // axios.get('http://localhost:3002/api/chamber',{})
+
+        // axios.get('http://localhost:3002/api/allOvens',{})
         //     .then((res)=>{
-        //         this.setState({chamber_data:res.data});
-        //         console.log(this.state.chamber_data);
-        // })
+        //         this.setState({ovens:res.data});//here im returning res instead of res.data
+        //         console.log(this.state.ovens);
+        //         this.Map_OvenData_ByName();//removeLater
+        //     })
         //     .catch(function (error) {
         //         console.log(error);
         //     });
-            // axios.get('http://localhost:3002/api/ovenUtil',{})
-            //     .then((res)=>{
-            //         this.setState({setups_status:res.data});//here im returning res instead of res.data
-            //         console.log(this.state.setups_status);
-            //     })
-            //     .catch(function (error) {
-            //         console.log(error);
-            //     });
-        axios.get('http://localhost:3002/api/allOvens',{})
-            .then((res)=>{
-                this.setState({ovens:res.data});//here im returning res instead of res.data
-                console.log(this.state.ovens);
-                this.Map_OvenData_ByName();//removeLater
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        axios.get('http://localhost:3002/api/setupStatusesDeneb',{})
-            .then((res)=>{
-                this.setState({ovenUtilsDeneb:res.data});//here im returning res instead of res.data
-                console.log(this.state.ovenUtilsDeneb);
-                //this.Map_OvenData_ByName();//removeLater
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        axios.get('http://localhost:3002/api/setupStatusesEnif',{})
-            .then((res)=>{
-                this.setState({ovenUtilsEnif:res.data});//here im returning res instead of res.data
-                console.log(this.state.ovenUtilsEnif);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        // axios.get('http://localhost:3002/api/setupStatusesDeneb',{})
+        //     .then((res)=>{
+        //         this.setState({ovenUtilsDeneb:res.data});//here im returning res instead of res.data
+        //         console.log(this.state.ovenUtilsDeneb);
+        //         //this.Map_OvenData_ByName();//removeLater
+        //     })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //     });
+        // axios.get('http://localhost:3002/api/setupStatusesEnif',{})
+        //     .then((res)=>{
+        //         this.setState({ovenUtilsEnif:res.data});//here im returning res instead of res.data
+        //         console.log(this.state.ovenUtilsEnif);
+        //     })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //     });
         axios.get('http://localhost:3002/api/jiras',{})
             .then((res)=>{
                 this.setState({jiraData:res.data});//here im returning res instead of res.data
                 console.log(this.state.jiraData);
-                // var temp=res.data.map(obj=>obj.Issue_Key);
-                // var mappedKeys=Object.entries(temp.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}));
-                //
-                // var obj=['Jiras','Count'];
-                // var tempm=[];
-                // for(var i in mappedKeys)
-                // {
-                //     if (i==0){
-                //         tempm.push(obj);
-                //         tempm.push(mappedKeys[i]);
-                //     }
-                //     else {
-                //         tempm.push(mappedKeys[i]);
-                //     }
-                // }
-                // console.log(tempm);
             })
             .catch(function (error) {
                 console.log(error);
@@ -165,7 +133,7 @@ class DashboardBody extends React.Component{
             id: 1,
             body: { message: e }
         }).then(function (response) {
-            console.log(response);
+            console.log("status 200 from server" );
         })
             .catch(function (error) {
                 console.log(error);
@@ -177,44 +145,44 @@ class DashboardBody extends React.Component{
 
     Map_OvenData_ByName(){
         var mappedData=[];
-        const ovensState=this.state.ovens;
+        const ovensState=this.props.ovensState;
         const ovensUtilDeneb=this.state.ovenUtilsDeneb;
         const ovensUtilEnif=this.state.ovenUtilsEnif;
+        if(ovensState!=null) {
+            if (ovensState.length > 0 && ovensUtilDeneb.length > 0 && ovensUtilEnif.length > 0) {
+                const ovensUtil = ovensUtilDeneb.concat(ovensUtilEnif);//add in future more databases if needed
+                const ovenArr = ovensState.filter(obj => obj.oven.toLowerCase().includes("ovn"));
 
-        if (ovensState.length>0&&ovensUtilDeneb.length>0&&ovensUtilEnif.length>0){
-                const ovensUtil=ovensUtilDeneb.concat(ovensUtilEnif);//add in future more databases if needed
-               const ovenArr= ovensState.filter(obj=>obj.oven.toLowerCase().includes("ovn"));
 
+                for (var ovenArrIndex in ovenArr) {
 
-               for(var ovenArrIndex in ovenArr){
+                    for (var ovenUtilArrIndex = 0; ovenUtilArrIndex < ovensUtil.length; ovenUtilArrIndex++) {
+                        for (var ovnUtilprop in ovensUtil[ovenUtilArrIndex]) {
+                            if (ovnUtilprop == "Name") {
+                                var nameStr = ovensUtil[ovenUtilArrIndex][ovnUtilprop].toLowerCase().replace(/e|rack|-|l|r/g, "");
+                                var namestr2 = ovenArr[ovenArrIndex]["oven"].replace("-", "").toLowerCase();
+                                if (nameStr.includes(namestr2)) {
 
-                   for (var ovenUtilArrIndex=0;ovenUtilArrIndex<ovensUtil.length;ovenUtilArrIndex++)
-                   {
-                       for( var ovnUtilprop in ovensUtil[ovenUtilArrIndex]){
-                           if (ovnUtilprop=="Name") {
-                               var nameStr = ovensUtil[ovenUtilArrIndex][ovnUtilprop].toLowerCase().replace(/e|rack|-|l|r/g, "");
-                               var namestr2 = ovenArr[ovenArrIndex]["oven"].replace("-", "").toLowerCase();
-                               if (nameStr.includes(namestr2)) {
+                                    var mappedObj = new Map();
+                                    for (var tmpKey in ovensUtil[ovenUtilArrIndex]) {
+                                        mappedObj.set(tmpKey, ovensUtil[ovenUtilArrIndex][tmpKey])
+                                    }
+                                    for (var tmpKey_ in ovenArr[ovenArrIndex]) {
+                                        mappedObj.set(tmpKey_, ovenArr[ovenArrIndex][tmpKey_])
+                                    }
 
-                                   var mappedObj=new Map();
-                                   for (var tmpKey in ovensUtil[ovenUtilArrIndex]){
-                                       mappedObj.set(tmpKey,ovensUtil[ovenUtilArrIndex][tmpKey])
-                                   }
-                                   for (var tmpKey_ in ovenArr[ovenArrIndex])
-                                   {
-                                       mappedObj.set(tmpKey_,ovenArr[ovenArrIndex][tmpKey_])
-                                   }
+                                    if (mappedData.filter(rackObj => rackObj.get("Name") == mappedObj.get("Name")).length == 0)//check if doesnt exist already
+                                        mappedData.push(mappedObj);
+                                }
+                            }
+                        }
 
-                                   if(mappedData.filter(rackObj=>rackObj.get("Name")==mappedObj.get("Name")).length==0)//check if doesnt exist already
-                                   mappedData.push(mappedObj);
-                               }
-                           }
-                       }
+                    }
 
-                   }
-
-               }
+                }
+            }
         }
+
         return mappedData
     }
 
@@ -253,11 +221,11 @@ class DashboardBody extends React.Component{
             <div className="grid-container">
                 <div className="header">
                     <div className="">
-                        <h1><Title/></h1>
+                        <h1><Title title={this.props.title}/></h1>
                     </div>
                 </div>
                 <div className="sidebar">
-                   <FilterBar data={this.state.ovens} toDB={(e)=>this.toDB(e)} IsDataToServerOK={this.state.IsDataToServerOK}/>
+                   <FilterBar data={this.props.ovensState} toDB={(e)=>this.toDB(e)} IsDataToServerOK={this.state.IsDataToServerOK}/>
                 </div>
                 <div className="dash">
                         <div className="status">
@@ -272,7 +240,7 @@ class DashboardBody extends React.Component{
                         </div>
 
                         <div className="ovens">
-                            <OvensView  ovensData={this.Map_OvenData_ByName()} ovenNames={this.state.Oven}/>
+                            <OvensView  ovensData={this.props.ovensData} ovenNames={this.state.Oven}/>
                         </div>
                 </div>
             </div>

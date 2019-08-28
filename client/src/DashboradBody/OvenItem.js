@@ -18,7 +18,7 @@ class OvenItem extends React.Component{
     if (this.props.data!=null) {
     if (this.props.data.get("Name") != null) {
         const data = this.props.data;
-        console.log(data.get("Name"),data.get("Name_"));
+        //console.log(data.get("Name"),data.get("Name_"));
         ovenview = <div className="oven-wrapper" key={data.get("Name")}>
             <div className="oven-section1" alt={this.props.data.get("ChamberStatusAdditionalInfo")}>
                 <div className={this.props.data.get("state") == "Active" ? DotGreen : DotYellow}></div>
@@ -35,14 +35,14 @@ class OvenItem extends React.Component{
             </div>
             <div className="oven-section3">
                 <div
-                    className="inner-border">ReadyForSelfTest: {data.get("ReadyForSelfTest") != null ? data.get("ReadyForSelfTest") : 0}</div>
+                    className="inner-border" style={{backgroundColor: "#b8fcbe"}}>ReadyForSelfTest: {data.get("ReadyForSelfTest") != null ? data.get("ReadyForSelfTest") : 0}</div>
                 <div
-                    className="inner-border">Available: {data.get("Available") != null ? data.get("Available") : 0}</div>
+                    className="inner-border" style={{backgroundColor: "#b8fcbe"}}>Available: {data.get("Available") != null ? data.get("Available") : 0}</div>
                 <div
                     className="sec3-2rows inner-border">Found: {data.get("Found") != null ? data.get("Found") : 0}</div>
-                <div className="inner-border">NotFound: {data.get("NotFound") != null ? data.get("NotFound") : 0}</div>
+                <div className="inner-border" style={{backgroundColor: "#fcb1b0"}}>NotFound: {data.get("NotFound") != null ? data.get("NotFound") : 0}</div>
                 <div
-                    className="inner-border">NotAvailable: {data.get("NotAvailable") != null ? data.get("NotAvailable") : 0}</div>
+                    className="inner-border" style={{backgroundColor: "#fcb1b0"}}>NotAvailable: {data.get("NotAvailable") != null ? data.get("NotAvailable") : 0}</div>
             </div>
             {/*<div className="oven-section4">*/}
             {/*analytics*/}

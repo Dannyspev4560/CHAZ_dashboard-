@@ -2,9 +2,20 @@
 
 .title{
     height: 100%;
-    font-family: 'Varela Round', sans-serif;
+    font-family:'Ubuntu', sans-serif;
     text-align: center;
     color: #3498db;
+
+}
+
+.side_title{
+    height: 30%;
+    padding-left: 0.3em;
+    font-family: 'Varela Round', sans-serif;
+    text-align: left;
+    vertical-align: bottom;
+    color: #45929a;
+    font-size: 0.4em;
 }
 
 

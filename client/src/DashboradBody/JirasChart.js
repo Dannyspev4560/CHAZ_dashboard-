@@ -1,5 +1,6 @@
 import React from 'react';
 import { Chart } from "react-google-charts";
+import {ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from "recharts";
 import Loader from "../reusableComponents/Loader";
 const JirasChart=(props)=>{
 
@@ -11,38 +12,21 @@ const JirasChart=(props)=>{
             var dataToChart=[];
             for(var i in mappedKeys)
             {
-                if (i==0){
-                    dataToChart.push(['Jiras','Count']);
-                    dataToChart.push(mappedKeys[i]);
-                }
-                else {
-                    dataToChart.push(mappedKeys[i]);
-                }
+                dataToChart.push({name:mappedKeys[i][0],count:mappedKeys[i][1].toString()})
             }
             console.log(dataToChart);
             return(
-                <div>
-                    <Chart
-                        width={'250px'}
-                        height={'200px'}
-                        chartType="BarChart"
-                        loader={<Loader/>}
-                        data={dataToChart}
-                        options={{
-                            color:'red',
-                            title: 'Jira count in presented cycles',
-                            chartArea: { width: '40%' },
-                            hAxis: {
+                <div >
+                    <ComposedChart layout="vertical" width={250} height={260} data={dataToChart}
+                                   margin={{top: 20, right: 20, bottom: 20, left: 20}}>
+                        <CartesianGrid stroke='#f5f5f5'/>
+                        <XAxis type='number'/>
+                        <YAxis dataKey="name" type="category"/>
+                        <Tooltip/>
+                        <Legend/>
+                        <Bar dataKey='count'  barSize={12} fill='#72a3db'/>
 
-                                minValue: 0,
-                            },
-                            vAxis: {
-
-                            },
-                        }}
-                        // For tests
-                        rootProps={{ 'data-testid': '1' }}
-                    />
+                    </ComposedChart>
                 </div>
             )
 
@@ -63,3 +47,26 @@ const JirasChart=(props)=>{
 };
 
 export default JirasChart;
+/*<Chart
+
+    width={'270px'}
+    height={'200px'}
+    chartType="BarChart"
+    loader={<Loader/>}
+    data={dataToChart}
+    options={{
+        color:'red',
+        title: 'Jira count in presented cycles',
+        chartArea: { width: '40%' },
+        hAxis: {
+
+            minValue: 0,
+        },
+        vAxis: {
+
+        },
+    }}
+    // For tests
+    rootProps={{ 'data-testid': '1' }}
+/>
+*/

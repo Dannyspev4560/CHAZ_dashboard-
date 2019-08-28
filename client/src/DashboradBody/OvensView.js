@@ -14,13 +14,12 @@ class OvensView extends React.Component{
         if (ovenNamerArr.length>0){
             for(var ovenNameIndex in ovenNamerArr) {
                 for (var rackIndex in  dataArr) {
-                    //if (dataArr[rackIndex].get("oven") == ovenNamerArr[ovenNameIndex])
-                      //  var check = ovenNamerArr[0];
 
-                    var tempArr = dataArr.filter(rackObj => rackObj.get("oven") == ovenNamerArr[ovenNameIndex]);
+                    var tempArr=[];
+                        tempArr = dataArr.filter(rackObj => rackObj.get("oven") == ovenNamerArr[ovenNameIndex]);
                     if (tempArr.length == 2 && ovenItems.filter(rackObj=>rackObj.get("oven")==ovenNamerArr[ovenNameIndex]).length==0) {
-                        var ovnMappedObj = new Map();
-                        ovnMappedObj = tempArr[0];
+                        var ovnMappedObj = new Map(tempArr[0]);//im copying so ill have th oven's parameters like temperature,name etc.
+                        //ovnMappedObj = [...tempArr[0]];//copies references!!!! bad!!!
                         ovnMappedObj.set("ReadyForSelfTest", tempArr[0].get("ReadyForSelfTest") + tempArr[1].get("ReadyForSelfTest"));
                         ovnMappedObj.set("NotFound", tempArr[0].get("NotFound") + tempArr[1].get("NotFound"));
                         ovnMappedObj.set("Available", tempArr[0].get("Available") + tempArr[1].get("Available"));
@@ -31,7 +30,7 @@ class OvensView extends React.Component{
                     }
                 }
             }
-            console.log(ovenItems);
+            //console.log(ovenItems);
             let view =ovenItems.map(obj=>{return(
                 <OvenItem  data={obj}/>
             )});
@@ -44,7 +43,7 @@ class OvensView extends React.Component{
         }
          else return (
             <div className="ovensDisplay">
-                <h2>Please Choose oven</h2>
+                <h2>Not Running on Oven or choose costume mode</h2>
             </div>
         )
     }

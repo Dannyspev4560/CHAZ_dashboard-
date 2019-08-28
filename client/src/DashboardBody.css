@@ -19,7 +19,7 @@ body{
     vertical-align: bottom;
     text-align: center;
     padding-top: 2em;
-    padding-bottom: 2em;
+    padding-bottom: 1em;
     background-color: white;
     }
 .sidenav{
@@ -78,7 +78,7 @@ body{
         vertical-align: bottom;
         text-align: center;
         padding-top: 2em;
-        padding-bottom: 2em;
+        padding-bottom: 1em;
         background-color: #f2f2f2;
     }
     .sidebar{

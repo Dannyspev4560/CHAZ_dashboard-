@@ -12,22 +12,25 @@
   "dependencies": {
     "@trendmicro/react-sidenav": "^0.4.5",
     "bootstrap": "^4.3.1",
-    "concurrently": "^4.1.0",
+    "concurrently": "^4.1.1",
     "cors": "^2.8.5",
     "install": "^0.12.2",
+    "mdbreact": "^4.19.0",
     "react": "^16.8.6",
     "react-canvas-js": "^1.0.1",
     "react-d3": "^0.4.0",
-    "react-d3-graph": "^2.0.1",
-    "react-google-charts": "^3.0.13",
-    "react-minimal-pie-chart": "^4.0.0",
-    "reactstrap": "^8.0.0",
+    "react-d3-graph": "^2.1.0",
+    "react-datetime": "^2.16.3",
+    "react-editable-table": "^1.12.32",
+    "react-google-charts": "^3.0.14",
+    "react-minimal-pie-chart": "^4.2.0",
+    "reactstrap": "^8.0.1",
     "recharts": "^1.6.2",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.87.1"
+    "semantic-ui-react": "^0.87.3"
   },
   "devDependencies": {
-    "d3": "^5.9.2",
+    "d3": "^5.9.7",
     "react-dom": "^16.8.6"
   }
 }

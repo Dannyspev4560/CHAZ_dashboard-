@@ -4,6 +4,7 @@ import { Menu } from 'semantic-ui-react';
 import './Main.css';
 import Loader from "./reusableComponents/Loader";
 import axios from "axios";
+import Settings from './Settings';
 
 class Main extends React.Component {
     state = {
@@ -13,10 +14,40 @@ class Main extends React.Component {
         OvensUtilizationDeneb:[],
         OvensUtilizationEnif:[],
         OvensState:[],
+        RunningCyclesEnif:[],
+        PresentedCyclesList:[]//this is very impotant variable dude
 
     };
 
-    handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+    handleItemClick = (e, { name }) => {
+        this.setState({ activeItem: name })
+        if (name=='check')
+        {
+            var msg=[
+                {id: 33,
+                cycles:"9355,9354,9353,9352,9351,9350",
+                DB:"Enif_Production_35"},
+                {id:34,
+                    cycles:"9355,9354,9353,9352,9351,9350",
+                    DB:"Enif_Production_35"
+                }
+
+            ];
+            axios.post("http://localhost:3002/api/tmp", {
+                id: 1,
+                body: { message: msg }
+            }).then(function (response) {
+                console.log("status 200 from server" );
+            })
+                .catch(function (error) {
+                    console.log(error);
+                    window.alert(error);
+                });
+
+            this.setState({activeItem:'Swift'});
+        }
+
+    };
 
     componentDidMount() {
         this.getDataFromDbMain();
@@ -34,6 +65,18 @@ class Main extends React.Component {
     }
 
     getDataFromDbMain = ()=> {
+
+        axios.get('http://localhost:3002/api/runningCyclesEnif',{})
+            .then((res)=>{
+                this.setState({RunningCyclesEnif:res.data});
+                console.log("from Main ==> ",this.state.RunningCyclesEnif);
+                this.render();
+                //this.Map_OvenData_ByName();//removeLater
+                this.mainMenuView();
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
         axios.get('http://localhost:3002/api/allOvens',{})
             .then((res)=>{
                 this.setState({OvensState:res.data});
@@ -47,7 +90,7 @@ class Main extends React.Component {
         axios.get('http://localhost:3002/api/setupStatusesDeneb',{})
             .then((res)=>{
                 this.setState({OvensUtilizationDeneb:res.data});//here im returning res instead of res.data
-                console.log(this.state.OvensUtilizationDeneb);
+                console.log("from Main ==> ",this.state.OvensUtilizationDeneb);
                 //this.Map_OvenData_ByName();//removeLater
             })
             .catch(function (error) {
@@ -56,7 +99,7 @@ class Main extends React.Component {
         axios.get('http://localhost:3002/api/setupStatusesEnif',{})
             .then((res)=>{
                 this.setState({OvensUtilizationEnif:res.data});//here im returning res instead of res.data
-                console.log(this.state.OvensUtilizationEnif);
+                console.log("from Main ==> ",this.state.OvensUtilizationEnif);
             })
             .catch(function (error) {
                 console.log(error);
@@ -71,7 +114,6 @@ class Main extends React.Component {
             if (ovensState.length > 0 && ovensUtilDeneb.length > 0 && ovensUtilEnif.length > 0) {
                 const ovensUtil = ovensUtilDeneb.concat(ovensUtilEnif);//add in future more databases if needed
                 const ovenArr = ovensState.filter(obj => obj.oven.toLowerCase().includes("ovn"));
-
 
                 for (var ovenArrIndex in ovenArr) {
 
@@ -105,12 +147,44 @@ class Main extends React.Component {
         return mappedData
     }
 
+
     mainMenuView= ()=>{
-        return(
-            <div>
-                <h2>Wait...</h2>
-            </div>
-        )
+
+        const cycles=this.state.RunningCyclesEnif;
+        var cyclesList=[];//add later on costume option
+        var reducedByFW=(cycles.map(fwobj=>fwobj.FirmwareVersion)).filter((v, i, a) => a.indexOf(v) === i);
+
+        for (var FWkey in reducedByFW){
+            var tmpCyclesStr="";
+            var lastkeyItterated=0;
+            for(var cyclekey in cycles){
+                if (cycles[cyclekey].FirmwareVersion==reducedByFW[FWkey]){
+                    if (tmpCyclesStr=="")
+                        tmpCyclesStr =cycles[cyclekey].ID;
+                    else    tmpCyclesStr+="," + cycles[cyclekey].ID;
+                    lastkeyItterated=cyclekey;
+                }
+
+            }
+            cyclesList.push({
+                id:FWkey+1,
+                cycles:tmpCyclesStr,
+                labId:cycles[lastkeyItterated].LabID,
+                project: cycles[lastkeyItterated].Project
+            });
+        }
+        this.setState({PresentedCyclesList:cyclesList});
+        console.log(cyclesList);
+        axios.post("http://localhost:3002/api/tmp", {
+            id: 101,
+            body: { message: this.state.PresentedCyclesList }
+        }).then(function (response) {
+            console.log(response );
+        })
+            .catch(function (error) {
+                console.log(error);
+            });
+
     }
     render() {
 
@@ -122,7 +196,7 @@ class Main extends React.Component {
                     <Menu >
                         <Menu.Item
                             className="tabs"
-                            name='Swift'
+                            name='Swift'//here i should give the id
                             active={activeItem === 'Swift'}
                             onClick={this.handleItemClick}>
                             Swift
@@ -134,13 +208,31 @@ class Main extends React.Component {
                             onClick={this.handleItemClick}>
                             Sunbird
                         </Menu.Item>
+                        <Menu.Item
+                            className="tabs "
+                            name='check'
+                            active={activeItem === 'check'}
+                            onClick={this.handleItemClick}>
+                            check
+                        </Menu.Item>
+                        <Menu.Item
+                            position='right'
+                            className="tabs "
+                            name='Settings'
+                            active={activeItem === 'Settings'}
+                            onClick={this.handleItemClick}>
+                            Settings
+                        </Menu.Item>
                     </Menu>
             </div>
                 <div className={activeItem === 'Swift' ? "visibilityVisible" : "visibilityHidden"} >
                    <DashboardBody title="Swift" ovensState={this.state.OvensState} ovensData={this.Map_OvenData_ByName()}/>
                 </div>
                 <div className={activeItem === 'Sunbird' ? "visibilityVisible" : "visibilityHidden"} >
-                    <DashboardBody title="Sunbird" />
+                    <DashboardBody title="Sunbird" ovensState={this.state.OvensState} ovensData={this.Map_OvenData_ByName()}/>
+                </div>
+                <div className={activeItem === 'Settings' ? "visibilityVisible" : "visibilityHidden"}>
+                    <Settings/>
                 </div>
             </div>
         );

@@ -1,9 +1,9 @@
 import React from 'react';
 import './FilterBar.css';
-import { Accordion, Icon,Form, Input, TextArea, Button, Select,Dropdown } from 'semantic-ui-react';
+import { Accordion, Icon, Input, Button, Dropdown } from 'semantic-ui-react';
 
 
-const optionsD=[{key:'Swift_Prod_33',text:'Swift_Prod_33',value:'Swift_Prod_33'},{key:'Enif_Production_35',text:'Enif_Production_35',value:'Enif_Production_35'}]
+const optionsD=[{key:'Swift_Prod_33',text:'Swift_Prod_33',value:'Swift_Prod_33'},{key:'Enif_Production_35',text:'Enif_Production_35',value:'Enif_Production_35'},{key:'Enif2_Production_38',text:'Enif2_Production_38',value:'Enif2_Production_38'}]
 
 class FilterBar extends React.Component{
     //TODO: authentication for all 3+ correction to oven input

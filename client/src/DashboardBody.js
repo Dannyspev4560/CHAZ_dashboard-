@@ -28,13 +28,12 @@ class DashboardBody extends React.Component{
             DB:[],
             Oven:[],
             cycle:[],
-            ovens:this.props.ovensState,
+            //ovens:this.props.ovensState,
             IsDataToServerOK:true,
-            ovenUtilsDeneb:[],
-            ovenUtilsEnif:[],
+            // ovenUtilsDeneb:[],
+            // ovenUtilsEnif:[],
             jiraData:[],
         };
-
         this.getDataFromDb = this.getDataFromDb.bind(this);
     }
 
@@ -69,37 +68,12 @@ class DashboardBody extends React.Component{
             .then((res) => {
                 this.setState({executions_data: res.data});
                 console.log(this.state.executions_data);
+
             })
             .catch(function (error) {
                 console.log(error);
             });
 
-        // axios.get('http://localhost:3002/api/allOvens',{})
-        //     .then((res)=>{
-        //         this.setState({ovens:res.data});//here im returning res instead of res.data
-        //         console.log(this.state.ovens);
-        //         this.Map_OvenData_ByName();//removeLater
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
-        // axios.get('http://localhost:3002/api/setupStatusesDeneb',{})
-        //     .then((res)=>{
-        //         this.setState({ovenUtilsDeneb:res.data});//here im returning res instead of res.data
-        //         console.log(this.state.ovenUtilsDeneb);
-        //         //this.Map_OvenData_ByName();//removeLater
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
-        // axios.get('http://localhost:3002/api/setupStatusesEnif',{})
-        //     .then((res)=>{
-        //         this.setState({ovenUtilsEnif:res.data});//here im returning res instead of res.data
-        //         console.log(this.state.ovenUtilsEnif);
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
         axios.get('http://localhost:3002/api/jiras',{})
             .then((res)=>{
                 this.setState({jiraData:res.data});//here im returning res instead of res.data
@@ -143,48 +117,48 @@ class DashboardBody extends React.Component{
       this.componentDidMount();
     };
 
-    Map_OvenData_ByName(){
-        var mappedData=[];
-        const ovensState=this.props.ovensState;
-        const ovensUtilDeneb=this.state.ovenUtilsDeneb;
-        const ovensUtilEnif=this.state.ovenUtilsEnif;
-        if(ovensState!=null) {
-            if (ovensState.length > 0 && ovensUtilDeneb.length > 0 && ovensUtilEnif.length > 0) {
-                const ovensUtil = ovensUtilDeneb.concat(ovensUtilEnif);//add in future more databases if needed
-                const ovenArr = ovensState.filter(obj => obj.oven.toLowerCase().includes("ovn"));
-
-
-                for (var ovenArrIndex in ovenArr) {
-
-                    for (var ovenUtilArrIndex = 0; ovenUtilArrIndex < ovensUtil.length; ovenUtilArrIndex++) {
-                        for (var ovnUtilprop in ovensUtil[ovenUtilArrIndex]) {
-                            if (ovnUtilprop == "Name") {
-                                var nameStr = ovensUtil[ovenUtilArrIndex][ovnUtilprop].toLowerCase().replace(/e|rack|-|l|r/g, "");
-                                var namestr2 = ovenArr[ovenArrIndex]["oven"].replace("-", "").toLowerCase();
-                                if (nameStr.includes(namestr2)) {
-
-                                    var mappedObj = new Map();
-                                    for (var tmpKey in ovensUtil[ovenUtilArrIndex]) {
-                                        mappedObj.set(tmpKey, ovensUtil[ovenUtilArrIndex][tmpKey])
-                                    }
-                                    for (var tmpKey_ in ovenArr[ovenArrIndex]) {
-                                        mappedObj.set(tmpKey_, ovenArr[ovenArrIndex][tmpKey_])
-                                    }
-
-                                    if (mappedData.filter(rackObj => rackObj.get("Name") == mappedObj.get("Name")).length == 0)//check if doesnt exist already
-                                        mappedData.push(mappedObj);
-                                }
-                            }
-                        }
-
-                    }
-
-                }
-            }
-        }
-
-        return mappedData
-    }
+    // Map_OvenData_ByName(){
+    //     var mappedData=[];
+    //     const ovensState=this.props.ovensState;
+    //     const ovensUtilDeneb=this.state.ovenUtilsDeneb;
+    //     const ovensUtilEnif=this.state.ovenUtilsEnif;
+    //     if(ovensState!=null) {
+    //         if (ovensState.length > 0 && ovensUtilDeneb.length > 0 && ovensUtilEnif.length > 0) {
+    //             const ovensUtil = ovensUtilDeneb.concat(ovensUtilEnif);//add in future more databases if needed
+    //             const ovenArr = ovensState.filter(obj => obj.oven.toLowerCase().includes("ovn"));
+    //
+    //
+    //             for (var ovenArrIndex in ovenArr) {
+    //
+    //                 for (var ovenUtilArrIndex = 0; ovenUtilArrIndex < ovensUtil.length; ovenUtilArrIndex++) {
+    //                     for (var ovnUtilprop in ovensUtil[ovenUtilArrIndex]) {
+    //                         if (ovnUtilprop == "Name") {
+    //                             var nameStr = ovensUtil[ovenUtilArrIndex][ovnUtilprop].toLowerCase().replace(/e|rack|-|l|r/g, "");
+    //                             var namestr2 = ovenArr[ovenArrIndex]["oven"].replace("-", "").toLowerCase();
+    //                             if (nameStr.includes(namestr2)) {
+    //
+    //                                 var mappedObj = new Map();
+    //                                 for (var tmpKey in ovensUtil[ovenUtilArrIndex]) {
+    //                                     mappedObj.set(tmpKey, ovensUtil[ovenUtilArrIndex][tmpKey])
+    //                                 }
+    //                                 for (var tmpKey_ in ovenArr[ovenArrIndex]) {
+    //                                     mappedObj.set(tmpKey_, ovenArr[ovenArrIndex][tmpKey_])
+    //                                 }
+    //
+    //                                 if (mappedData.filter(rackObj => rackObj.get("Name") == mappedObj.get("Name")).length == 0)//check if doesnt exist already
+    //                                     mappedData.push(mappedObj);
+    //                             }
+    //                         }
+    //                     }
+    //
+    //                 }
+    //
+    //             }
+    //         }
+    //     }
+    //
+    //     return mappedData
+    // }
 
     ConvObjToArr_ovenData(){
         var mappedOvenData=new Map();
@@ -213,6 +187,20 @@ class DashboardBody extends React.Component{
         return mappedOvenData;
     }
 
+    getOvensNamesFromExecutions(){
+        try{
+        if(this.state.executions_data!=null && this.state.executions_data.length>0){
+        var stationNames=this.state.executions_data.flatMap(execution=>execution.StationName!=null ?execution.StationName.split("-")[1].slice(0, -1):[]);
+        var mappedracks=stationNames.filter((v, i, a) => a.indexOf(v) === i);//oven names
+        console.log("dashboard.getOvensNamesFromExecutions==>",mappedracks);
+        return mappedracks;
+        }
+        else return 0;}
+        catch (e) {
+            console.log(`Error : ${e} ,maybe not oven stations :(`);
+            return 0;
+        }
+    }
 
 
     render() {
@@ -240,7 +228,7 @@ class DashboardBody extends React.Component{
                         </div>
 
                         <div className="ovens">
-                            <OvensView  ovensData={this.props.ovensData} ovenNames={this.state.Oven}/>
+                            <OvensView  ovensData={this.props.ovensData} ovenNames={this.getOvensNamesFromExecutions()}/>
                         </div>
                 </div>
             </div>
